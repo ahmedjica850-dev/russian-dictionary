@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ru" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Русский лексический словарь</title>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Roboto:wght@300;400;500;700&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+
+  <!-- ========== MAIN HEADER ========== -->
+  <header id="mainHeader">
+    <div class="header-inner">
+      <!-- Left: Title block -->
+      <div class="header-title-block" id="headerTitleBlock">
+        <h1 class="site-title" data-lang-ru="Русский лексический словарь" data-lang-en="Russian Lexical Dictionary" data-lang-fr="Dictionnaire Lexical Russe" data-lang-ar="Русский лексический словарь">Русский лексический словарь</h1>
+        <span class="site-subtitle" id="siteSubtitle" data-lang-ru="Создано Ахмедом Абделмонем" data-lang-en="Created by Ahmed Abdelmonem" data-lang-fr="Créé par Ahmed Abdelmonem" data-lang-ar="تم إنشاؤه بواسطة أحمد عبد المنعم">Создано Ахмедом Абделмонем</span>
+      </div>
+      <!-- Right: Author block -->
+      <div class="header-author-block" id="headerAuthorBlock">
+        <img id="devPhoto" class="dev-photo" src="me.jpg" alt="Developer Photo"
+             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23444%22/%3E%3Ctext x=%2250%22 y=%2275%22 font-size=%2270%22 text-anchor=%22middle%22 fill=%22%23ddd%22%3E👤%3C/text%3E%3C/svg%3E'">
+        <div class="dev-names" id="devNames">
+          <span class="dev-name dev-name-main" data-lang-ru="Ахмед Абделмонем" data-lang-en="Ahmed Abdelmonem" data-lang-fr="Ahmed Abdelmonem" data-lang-ar="أحمد محمد عبد المنعم">Ахмед Абделмонем</span>
+          <span class="dev-name dev-name-sub" data-lang-ru="Разработчик" data-lang-en="Developer" data-lang-fr="Développeur" data-lang-ar="مطور">Разработчик</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls row -->
+    <div class="header-controls" id="headerControls">
+      <div class="search-wrapper">
+        <input type="text" id="searchInput" placeholder="Поиск (RU / EN / FR / AR)" data-lang-placeholder-ru="Поиск (RU / EN / FR / AR)" data-lang-placeholder-en="Search (RU / EN / FR / AR)" data-lang-placeholder-fr="Rechercher (RU / EN / FR / AR)" data-lang-placeholder-ar="بحث (RU / EN / FR / AR)">
+        <span id="clearSearch" class="clear-search">&times;</span>
+      </div>
+      <div class="filter-bar" id="filterBar">
+        <button class="filter-btn active" data-filter="roots">Корни</button>
+        <button class="filter-btn" data-filter="verbs">Глаголы</button>
+        <button class="filter-btn" data-filter="nouns">Сущ.</button>
+        <button class="filter-btn" data-filter="adjectives">Прил.</button>
+        <button class="filter-btn" data-filter="prefixes">Префиксы</button>
+      </div>
+      <div class="sub-nav-bar" id="subNavBar">
+        <button class="sub-nav-btn active" data-sub="all">Все</button>
+        <button class="sub-nav-btn sub-nav-fav" data-sub="favorites">★</button>
+        <button class="sub-nav-btn sub-nav-done" data-sub="completed">✓</button>
+        <button class="sub-nav-btn sub-nav-quiz" data-sub="quiz">Quiz</button>
+      </div>
+      <div class="view-toggle">
+        <button id="cardViewBtn" class="view-btn active" title="Cards">⊞</button>
+        <button id="listViewBtn" class="view-btn" title="List">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========== STATS BAR ========== -->
+  <div id="statsDisplay" class="stats-bar"></div>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main id="rootCards" class="cards-view"></main>
+
+  <!-- ========== VERBS LIST VIEW ========== -->
+  <div id="verbsListView" style="display:none;">
+    <div class="category-cards" id="verbCategoryCards"></div>
+    <div id="verbListContainer"></div>
+  </div>
+
+  <!-- ========== NOUNS LIST VIEW ========== -->
+  <div id="nounsListView" style="display:none;">
+    <div class="category-cards" id="nounCategoryCards"></div>
+    <div id="nounListContainer"></div>
+  </div>
+
+  <!-- ========== ADJECTIVES LIST VIEW ========== -->
+  <div id="adjectivesListView" style="display:none;">
+    <div class="category-cards" id="adjCategoryCards"></div>
+    <div id="adjListContainer"></div>
+  </div>
+
+  <!-- ========== ROOT DETAIL MODAL ========== -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2 id="modalRootTitle"></h2>
+      <div class="modal-meaning" id="modalMeaning"></div>
+      <div class="modal-desc" id="modalDescription"></div>
+      <section><h3>Глаголы и спряжения</h3><div id="modalVerbs"></div></section>
+      <section><h3>Примеры</h3><div id="modalExamples"></div></section>
+      <section><h3>Производные существительные</h3><div id="modalNouns"></div></section>
+    </div>
+  </div>
+
+  <!-- ========== VERB DETAIL MODAL ========== -->
+  <div id="verbDetailModal" class="modal">
+    <div class="verb-detail-content">
+      <span class="close-verb-modal">&times;</span>
+      <div class="verb-detail-header">
+        <div class="verb-pair-display"><span class="verb-nsv-title"></span><span class="verb-divider">/</span><span class="verb-sv-title"></span></div>
+        <div class="verb-meaning-display"></div>
+      </div>
+      <div class="verb-detail-section"><h4 class="verb-section-title">Императив</h4><div class="verb-imperative-display"></div></div>
+      <div class="verb-detail-section"><h4 class="verb-section-title">Пример</h4><div class="verb-example-ru"></div><div class="verb-example-translation"></div></div>
+      <div class="verb-detail-section"><h4 class="verb-section-title">Корень</h4><div class="verb-root-display"></div></div>
+    </div>
+  </div>
+
+  <!-- ========== NOUN DETAIL MODAL ========== -->
+  <div id="nounDetailModal" class="modal">
+    <div class="noun-detail-content">
+      <span class="close-noun-modal">&times;</span>
+      <div class="noun-detail-header"><span class="noun-word"></span><div class="noun-meaning-display"></div></div>
+      <div class="noun-detail-section"><h4 class="noun-section-title">Род</h4><div class="noun-gender-display"></div></div>
+      <div class="noun-detail-section"><h4 class="noun-section-title">Множ. число</h4><div class="noun-plural-display"></div></div>
+      <div class="noun-detail-section"><h4 class="noun-section-title">Пример</h4><div class="noun-example-ru"></div><div class="noun-example-translation"></div></div>
+      <div class="noun-detail-section" id="nounExtraInfo" style="display:none;"><h4 class="noun-section-title">Дополнительно</h4><div class="noun-extra-display"></div></div>
+    </div>
+  </div>
+
+  <!-- ========== ADJECTIVE DETAIL MODAL ========== -->
+  <div id="adjectiveDetailModal" class="modal">
+    <div class="adj-detail-content">
+      <span class="close-adj-modal">&times;</span>
+      <div class="adj-detail-header"><span class="adj-word"></span><div class="adj-meaning-display"></div></div>
+      <div class="adj-detail-section"><h4 class="adj-section-title">Наречие</h4><div class="adj-adverb-display"></div></div>
+      <div class="adj-detail-section"><h4 class="adj-section-title">Ударение</h4><div class="adj-stress-display"></div></div>
+      <div class="adj-detail-section"><h4 class="adj-section-title">Склонение</h4><div class="adj-declension-table"></div></div>
+      <div class="adj-detail-section"><h4 class="adj-section-title">Примеры</h4><div class="adj-example-ru"></div><div class="adj-example-translation"></div></div>
+    </div>
+  </div>
+
+  <!-- ========== QUIZ CONTAINER ========== -->
+  <div id="quizContainer" style="display:none;">
+    <div class="quiz-settings-panel" id="quizSettingsPanel">
+      <h2 data-lang-ru="Настройки теста" data-lang-en="Quiz Settings" data-lang-fr="Paramètres du quiz" data-lang-ar="إعدادات الاختبار">Настройки теста</h2>
+      <div class="quiz-setting-row">
+        <label data-lang-ru="Тип теста:" data-lang-en="Quiz Type:" data-lang-fr="Type de quiz:" data-lang-ar="نوع الاختبار:">Тип теста:</label>
+        <select id="quizTypeSelect">
+          <option value="meaning">Значение (Выбор)</option>
+          <option value="reverse">Обратный перевод</option>
+          <option value="scramble">Буквы вразброс</option>
+          <option value="missing">Пропущенная буква</option>
+          <option value="random">Случайная смесь</option>
+        </select>
+      </div>
+      <div class="quiz-setting-row">
+        <label data-lang-ru="Время:" data-lang-en="Time:" data-lang-fr="Temps:" data-lang-ar="الوقت:">Время:</label>
+        <select id="quizTimeSelect">
+          <option value="30">30 секунд</option>
+          <option value="60">1 минута</option>
+          <option value="120">2 минуты</option>
+          <option value="300">5 минут</option>
+          <option value="0">Без ограничений</option>
+        </select>
+      </div>
+      <div class="quiz-setting-row">
+        <label data-lang-ru="Источник:" data-lang-en="Source:" data-lang-fr="Source:" data-lang-ar="المصدر:">Источник:</label>
+        <select id="quizSourceSelect">
+          <option value="all">Все слова</option>
+          <option value="favorites">Избранное</option>
+          <option value="completed">Завершённые</option>
+        </select>
+      </div>
+      <div class="quiz-buttons-row">
+        <button id="quizStartBtn" class="quiz-action-btn start-btn" data-lang-ru="Начать" data-lang-en="Start" data-lang-fr="Démarrer" data-lang-ar="ابدأ">Начать</button>
+        <button id="quizBackBtn" class="quiz-action-btn back-btn" data-lang-ru="Назад" data-lang-en="Back" data-lang-fr="Retour" data-lang-ar="رجوع">Назад</button>
+      </div>
+    </div>
+    <div class="quiz-game-panel" id="quizGamePanel" style="display:none;">
+      <div class="quiz-game-header">
+        <div id="quizTimerDisplay">Время: --</div>
+        <span id="quizScoreDisplay">Счёт: 0</span>
+        <button id="quizStopBtn" class="quiz-stop-btn" data-lang-ru="Стоп" data-lang-en="Stop" data-lang-fr="Arrêter" data-lang-ar="إيقاف">Стоп</button>
+      </div>
+      <div id="quizQuestionArea"><div class="quiz-question"></div><div class="quiz-options"></div><div class="quiz-input" style="display:none;"><input id="quizAnswerInput" type="text" placeholder="Ваш ответ"><button id="quizSubmitAnswerBtn">Ответить</button></div></div>
+      <div id="quizFeedback"></div>
+      <div class="quiz-game-actions">
+        <button id="quizNextBtn" data-lang-ru="Далее" data-lang-en="Next" data-lang-fr="Suivant" data-lang-ar="التالي">Далее</button>
+        <button id="quizSkipBtn" data-lang-ru="Пропустить (-1)" data-lang-en="Skip (-1)" data-lang-fr="Passer (-1)" data-lang-ar="تخطي (-1)">Пропустить (-1)</button>
+      </div>
+    </div>
+    <div class="quiz-finish-panel" id="quizFinishPanel" style="display:none;">
+      <h2 data-lang-ru="Тест завершён!" data-lang-en="Quiz Finished!" data-lang-fr="Quiz terminé!" data-lang-ar="انتهى الاختبار!">Тест завершён!</h2>
+      <p id="quizFinalScore"></p>
+      <div id="quizMistakesReview" class="quiz-mistakes-review"></div>
+      <div id="quizLeaderboard"></div>
+      <div class="quiz-finish-buttons">
+        <button id="quizRestartBtn" data-lang-ru="Заново" data-lang-en="Restart" data-lang-fr="Recommencer" data-lang-ar="إعادة">Заново</button>
+        <button id="quizBackFromFinishBtn" data-lang-ru="Назад" data-lang-en="Back" data-lang-fr="Retour" data-lang-ar="رجوع">Назад</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== ABOUT PAGE ========== -->
+  <div id="aboutPage" style="display:none;">
+    <div class="about-container">
+      <button id="aboutCloseBtn" class="about-close-btn">&times;</button>
+      <div class="about-icon">📚</div>
+      <h1 class="about-title" data-lang-ru="Русский лексический словарь" data-lang-en="Russian Lexical Dictionary" data-lang-fr="Dictionnaire Lexical Russe" data-lang-ar="القاموس المعجمي الروسي">Русский лексический словарь</h1>
+      <div class="about-content">
+        <p class="about-intro" data-lang-ru="Ваш идеальный помощник в изучении русского языка. Приложение объединяет корни, глаголы, существительные и прилагательные в единую систему, позволяя вам глубоко понимать структуру языка." data-lang-en="Your perfect companion for learning Russian. The app combines roots, verbs, nouns and adjectives into one system, allowing you to deeply understand the language structure." data-lang-fr="Votre compagnon idéal pour apprendre le russe. L'application combine racines, verbes, noms et adjectifs en un seul système." data-lang-ar="رفيقك المثالي لتعلم اللغة الروسية. يجمع التطبيق بين الجذور والأفعال والأسماء والصفات في نظام واحد.">Ваш идеальный помощник в изучении русского языка.</p>
+        <div class="about-stats">
+          <div class="about-stat-item"><span class="about-stat-num">2000+</span><span class="about-stat-label" data-lang-ru="Глаголов" data-lang-en="Verbs" data-lang-fr="Verbes" data-lang-ar="فعل">Глаголов</span></div>
+          <div class="about-stat-item"><span class="about-stat-num">3500+</span><span class="about-stat-label" data-lang-ru="Существительных" data-lang-en="Nouns" data-lang-fr="Noms" data-lang-ar="اسم">Существительных</span></div>
+          <div class="about-stat-item"><span class="about-stat-num">3500+</span><span class="about-stat-label" data-lang-ru="Прилагательных" data-lang-en="Adjectives" data-lang-fr="Adjectifs" data-lang-ar="صفة">Прилагательных</span></div>
+        </div>
+        <div class="about-features">
+          <h2 data-lang-ru="Возможности" data-lang-en="Features" data-lang-fr="Fonctionnalités" data-lang-ar="المميزات">Возможности</h2>
+          <ul>
+            <li data-lang-ru="🔍 Поиск по корням, глаголам, существительным и прилагательным" data-lang-en="🔍 Search roots, verbs, nouns and adjectives" data-lang-fr="🔍 Rechercher racines, verbes, noms et adjectifs" data-lang-ar="🔍 البحث في الجذور والأفعال والأسماء والصفات">🔍 Поиск по всем категориям</li>
+            <li data-lang-ru="⭐ Избранное и отслеживание прогресса" data-lang-en="⭐ Favorites and progress tracking" data-lang-fr="⭐ Favoris et suivi de progression" data-lang-ar="⭐ المفضلة وتتبع التقدم">⭐ Избранное и прогресс</li>
+            <li data-lang-ru="📝 Тесты с разными режимами" data-lang-en="📝 Quizzes with different modes" data-lang-fr="📝 Quiz avec différents modes" data-lang-ar="📝 اختبارات بأنماط مختلفة">📝 Тесты и проверка знаний</li>
+            <li data-lang-ru="🌐 Поддержка 4 языков интерфейса" data-lang-en="🌐 4 interface languages" data-lang-fr="🌐 4 langues d'interface" data-lang-ar="🌐 دعم 4 لغات للواجهة">🌐 4 языка интерфейса</li>
+            <li data-lang-ru="🎨 Тёмная, светлая и цветные темы" data-lang-en="🎨 Dark, light and colorful themes" data-lang-fr="🎨 Thèmes sombre, clair et colorés" data-lang-ar="🎨 سمات داكنة وفاتحة وملونة">🎨 Несколько тем оформления</li>
+          </ul>
+        </div>
+        <div class="about-footer">
+          <p data-lang-ru="Создано с ❤️" data-lang-en="Created with ❤️" data-lang-fr="Créé avec ❤️" data-lang-ar="تم الإنشاء بـ ❤️">Создано с ❤️</p>
+          <p class="about-author">Ахмед Мохамед Абделмонем</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== ABOUT BUTTON (FLOATING) ========== -->
+  <button id="aboutFloatingBtn" class="about-floating-btn" title="О приложении">ℹ️</button>
+
+  <!-- ========== BOTTOM NAV ========== -->
+  <nav class="bottom-nav">
+    <div class="theme-switcher">
+      <button class="theme-btn" data-theme="dark">🌙</button>
+      <button class="theme-btn" data-theme="light">☀️</button>
+      <button class="theme-btn" data-color-scheme="blue">🔵</button>
+      <button class="theme-btn" data-color-scheme="green">🟢</button>
+      <button class="theme-btn" data-color-scheme="purple">🟣</button>
+    </div>
+    <div class="lang-switcher">
+      <button class="lang-btn active" data-lang="ru">RU</button>
+      <button class="lang-btn" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="fr">FR</button>
+      <button class="lang-btn" data-lang="ar">AR</button>
+    </div>
+  </nav>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script src="data.js"></script>
+  <script src="verbsList.js"></script>
+  <script src="nounsList.js"></script>
+  <script src="adjList.js"></script>
+  <script src="app.js"></script>
+
+<!-- ========== ACTIVATION SCREEN ========== -->
+<div id="activationScreen" style="display:none;">
+  <div class="activation-overlay">
+    <div class="activation-card">
+      <div class="activation-icon">🔐</div>
+      <h2 class="activation-title" data-lang-ru="Активация" data-lang-en="Activation" data-lang-fr="Activation" data-lang-ar="تفعيل">Activation</h2>
+      <p class="activation-desc" data-lang-ru="Введите ваш Telegram и код активации" data-lang-en="Enter your Telegram and activation code" data-lang-fr="Entrez votre Telegram et code d'activation" data-lang-ar="أدخل معرف تيليجرام وكود التفعيل">Enter your Telegram and activation code</p>
+      
+      <div class="activation-field">
+        <label data-lang-ru="Telegram:" data-lang-en="Telegram:" data-lang-fr="Telegram:" data-lang-ar="تيليجرام:">Telegram:</label>
+        <input type="text" id="activationUsername" placeholder="@username" dir="ltr">
+      </div>
+      
+      <div class="activation-field">
+        <label data-lang-ru="Код активации:" data-lang-en="Activation Code:" data-lang-fr="Code d'activation:" data-lang-ar="كود التفعيل:">Activation Code:</label>
+        <input type="text" id="activationCode" placeholder="XXXXXXXX" dir="ltr">
+      </div>
+      
+      <div id="activationStatus"></div>
+      
+      <button id="activationSubmitBtn" data-lang-ru="Активировать" data-lang-en="Activate" data-lang-fr="Activer" data-lang-ar="تفعيل">Activate</button>
+      
+      <button id="demoBtn" class="demo-btn" data-lang-ru="Попробовать демо" data-lang-en="Try Demo" data-lang-fr="Essayer la démo" data-lang-ar="جرب النسخة التجريبية">Try Demo</button>
+      
+      <p class="activation-contact">
+        <span data-lang-ru="Для подписки: " data-lang-en="To subscribe: " data-lang-fr="Pour s'abonner: " data-lang-ar="للاشتراك: ">To subscribe: </span>
+        <strong>@Ahmed_jica</strong>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== DEMO BANNER ========== -->
+<div id="demoBanner" style="display:none;">
+  <span data-lang-ru="🔓 Демо-режим: ограниченный доступ. " data-lang-en="🔓 Demo mode: limited access. " data-lang-fr="🔓 Mode démo: accès limité. " data-lang-ar="🔓 الوضع التجريبي: وصول محدود. ">🔓 Demo mode: limited access. </span>
+  <span data-lang-ru="Для полного доступа: @ahmedjica" data-lang-en="For full access: @ahmedjica" data-lang-fr="Pour un accès complet: @ahmedjica" data-lang-ar="للوصول الكامل: @ahmedjica">For full access: @ahmedjica</span>
+</div>
+
+<!-- ========== SUBSCRIBE MODAL ========== -->
+<div id="subscribeModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close-subscribe-modal">&times;</span>
+    <h2 data-lang-ru="Полный доступ" data-lang-en="Full Access" data-lang-fr="Accès complet" data-lang-ar="وصول كامل">Full Access</h2>
+    <p data-lang-ru="Эта функция доступна только подписчикам." data-lang-en="This feature is available only to subscribers." data-lang-fr="Cette fonctionnalité est réservée aux abonnés." data-lang-ar="هذه الميزة متاحة للمشتركين فقط.">This feature is available only to subscribers.</p>
+    <p style="margin-top:16px;font-size:1.2rem;"><strong>@ahmedjica</strong></p>
+  </div>
+</div>
+</body>
+</html>
