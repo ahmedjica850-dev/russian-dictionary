@@ -47,7 +47,7 @@ let quizCategory = 'verbs'; // 'verbs', 'nouns', 'adjectives'
 let LICENSE_MODE = 'demo'; // 'demo' or 'full'
 let LICENSE_USERNAME = '';
 const LICENSE_CONFIG = {
-    botURL: 'https://script.google.com/macros/s/AKfycbxTf1k3kLtugj3ucszCyZVrku_F_5EVsQbZruaLOijsucNjxb2iNKoN5lc7bBjQZWlI/exec',
+    botURL: 'https://script.google.com/macros/s/AKfycbwterXYASmncfOfKhiIeoJDexKCyQFtueLxAZ3WhCd0VzoIuygyoyWUAtrqnE-XbnJu/exec',
     checkInterval: 7,
     storageKey: 'rusroots_license'
 };
@@ -342,11 +342,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   if (licenseCheck.mode === 'full') {
     LICENSE_MODE = 'full';
-    LICENSE_USERNAME = licenseCheck.username;
+    LICENSE_USERNAME = licenseCheck.email;   // <-- التصحيح
     hideActivationScreen();
     document.getElementById('demoBanner').style.display = 'none';
     initFullApp();
-  } else {
+  }
+      else {
     LICENSE_MODE = 'demo';
     showActivationScreen();
   }
