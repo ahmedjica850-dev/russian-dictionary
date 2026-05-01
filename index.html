@@ -253,29 +253,33 @@
 <div id="activationScreen" style="display:none;">
   <div class="activation-overlay">
     <div class="activation-card">
-      <div class="activation-icon">🔐</div>
-      <h2 class="activation-title" data-lang-ru="Активация" data-lang-en="Activation" data-lang-fr="Activation" data-lang-ar="تفعيل">Activation</h2>
-      <p class="activation-desc" data-lang-ru="Введите ваш Telegram и код активации" data-lang-en="Enter your Telegram and activation code" data-lang-fr="Entrez votre Telegram et code d'activation" data-lang-ar="أدخل معرف تيليجرام وكود التفعيل">Enter your Telegram and activation code</p>
+      <div class="activation-icon">📚</div>
+      <h2 class="activation-title">RusRoots Dictionary</h2>
+      <p class="activation-desc">Sign in to continue</p>
       
-      <div class="activation-field">
-        <label data-lang-ru="Telegram:" data-lang-en="Telegram:" data-lang-fr="Telegram:" data-lang-ar="تيليجرام:">Telegram:</label>
-        <input type="text" id="activationUsername" placeholder="@username" dir="ltr">
+      <div id="g_id_onload"
+           data-client_id="994488113378-kcuc54ukta9naprfkbs5galbpmnnl5te.apps.googleusercontent.com"
+           data-context="signin"
+           data-ux_mode="popup"
+           data-callback="handleGoogleSignIn"
+           data-auto_prompt="false">
       </div>
       
-      <div class="activation-field">
-        <label data-lang-ru="Код активации:" data-lang-en="Activation Code:" data-lang-fr="Code d'activation:" data-lang-ar="كود التفعيل:">Activation Code:</label>
-        <input type="text" id="activationCode" placeholder="XXXXXXXX" dir="ltr">
+      <div class="g_id_signin"
+           data-type="standard"
+           data-shape="pill"
+           data-theme="outline"
+           data-text="signin_with"
+           data-size="large"
+           data-logo_alignment="left">
       </div>
       
       <div id="activationStatus"></div>
       
-      <button id="activationSubmitBtn" data-lang-ru="Активировать" data-lang-en="Activate" data-lang-fr="Activer" data-lang-ar="تفعيل">Activate</button>
-      
-      <button id="demoBtn" class="demo-btn" data-lang-ru="Попробовать демо" data-lang-en="Try Demo" data-lang-fr="Essayer la démo" data-lang-ar="جرب النسخة التجريبية">Try Demo</button>
+      <button id="demoBtn" class="demo-btn">Try Demo</button>
       
       <p class="activation-contact">
-        <span data-lang-ru="Для подписки: " data-lang-en="To subscribe: " data-lang-fr="Pour s'abonner: " data-lang-ar="للاشتراك: ">To subscribe: </span>
-        <strong>@Ahmed_jica</strong>
+        To subscribe, contact: <strong>@Ahmed_jica</strong>
       </p>
     </div>
   </div>
@@ -296,5 +300,6 @@
     <p style="margin-top:16px;font-size:1.2rem;"><strong>@ahmedjica</strong></p>
   </div>
 </div>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 </html>

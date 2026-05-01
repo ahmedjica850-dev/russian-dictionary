@@ -47,7 +47,7 @@ let quizCategory = 'verbs'; // 'verbs', 'nouns', 'adjectives'
 let LICENSE_MODE = 'demo'; // 'demo' or 'full'
 let LICENSE_USERNAME = '';
 const LICENSE_CONFIG = {
-    botURL: 'https://rusroots-bot.onrender.com',
+    botURL: 'https://script.google.com/macros/s/AKfycbxTf1k3kLtugj3ucszCyZVrku_F_5EVsQbZruaLOijsucNjxb2iNKoN5lc7bBjQZWlI/exec',
     checkInterval: 7,
     storageKey: 'rusroots_license'
 };
@@ -143,62 +143,29 @@ function isLicenseValid(license) {
     return true;
 }
 
-async function verifyWithBot(username) {
-    try {
-        const response = await fetch(`${LICENSE_CONFIG.botURL}/api/verify`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'check',
-                username: username,
-                deviceId: generateDeviceFingerprint()
-            })
-        });
-        return await response.json();
-    } catch {
-        return { status: 'error', message: 'Cannot connect to license server' };
-    }
-}
 
-async function activateLicense(username, code) {
-    try {
-        const response = await fetch(`${LICENSE_CONFIG.botURL}/api/verify`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'activate',
-                username: username,
-                code: code,
-                deviceId: generateDeviceFingerprint()
-            })
-        });
-        return await response.json();
-    } catch {
-        return { status: 'error', message: 'Cannot connect to license server' };
-    }
-}
 
 async function checkLicenseOnStartup() {
     const license = getStoredLicense();
     
-    if (isLicenseValid(license)) {
+    if (license && license.email && isLicenseValid(license)) {
         const lastCheck = license.lastBotCheck || 0;
         const daysSinceLastCheck = (Date.now() - lastCheck) / (1000 * 60 * 60 * 24);
         
         if (daysSinceLastCheck >= LICENSE_CONFIG.checkInterval) {
-            const result = await verifyWithBot(license.username);
+            const result = await verifyLicenseWithServer(license.email, license.deviceFingerprint);
             if (result.status === 'success') {
                 license.lastBotCheck = Date.now();
                 license.expiry = result.expiry;
                 storeLicense(license);
-                return { allowed: true, mode: 'full', username: license.username };
+                return { allowed: true, mode: 'full', email: license.email };
             } else {
                 localStorage.removeItem(LICENSE_CONFIG.storageKey);
                 return { allowed: false, mode: 'demo', message: result.message };
             }
         }
         
-        return { allowed: true, mode: 'full', username: license.username };
+        return { allowed: true, mode: 'full', email: license.email };
     }
     
     return { allowed: false, mode: 'demo', needActivation: true };
@@ -232,48 +199,6 @@ function setupSubscribeModal() {
     }
 }
 
-async function handleActivation() {
-    const username = document.getElementById('activationUsername').value.trim().replace('@', '');
-    const code = document.getElementById('activationCode').value.trim();
-    const statusEl = document.getElementById('activationStatus');
-    
-    if (!username || !code) {
-        statusEl.textContent = 'Please fill all fields';
-        statusEl.style.color = 'var(--danger)';
-        return;
-    }
-    
-    statusEl.textContent = 'Verifying...';
-    statusEl.style.color = 'var(--accent)';
-    
-    const result = await activateLicense(username, code);
-    
-    if (result.status === 'success') {
-        storeLicense({
-            username: username,
-            deviceFingerprint: generateDeviceFingerprint(),
-            expiry: result.expiry,
-            lastBotCheck: Date.now(),
-            activatedAt: Date.now()
-        });
-        
-        LICENSE_MODE = 'full';
-        LICENSE_USERNAME = username;
-        
-        statusEl.textContent = '✅ Activated!';
-        statusEl.style.color = 'var(--check-color)';
-        
-        setTimeout(() => {
-            hideActivationScreen();
-            document.getElementById('demoBanner').style.display = 'none';
-            initFullApp();
-            refreshCurrentView('');
-        }, 1000);
-    } else {
-        statusEl.textContent = '❌ ' + result.message;
-        statusEl.style.color = 'var(--danger)';
-    }
-}
 
 function enterDemoMode() {
     LICENSE_MODE = 'demo';
@@ -312,6 +237,96 @@ openModal = function(rootKey) {
     return originalOpenModal(rootKey);
 };
 
+// ========================
+// GOOGLE SIGN-IN
+// ========================
+function handleGoogleSignIn(response) {
+    const credential = response.credential;
+    const userInfo = parseJwt(credential);
+    const email = userInfo.email;
+    
+    // Check if email is in allowed list
+    checkEmailAccess(email);
+}
+
+function parseJwt(token) {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+}
+
+async function checkEmailAccess(email) {
+    const statusEl = document.getElementById('activationStatus');
+    statusEl.textContent = 'Verifying...';
+    statusEl.style.color = 'var(--accent)';
+    
+    try {
+        const response = await fetch(`${LICENSE_CONFIG.botURL}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'check',
+                email: email,
+                deviceId: generateDeviceFingerprint()
+            })
+        });
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            LICENSE_MODE = 'full';
+            LICENSE_USERNAME = email;
+            storeLicense({
+                email: email,
+                deviceFingerprint: generateDeviceFingerprint(),
+                expiry: result.expiry,
+                lastBotCheck: Date.now()
+            });
+            
+            statusEl.textContent = '✅ Access granted!';
+            statusEl.style.color = 'var(--check-color)';
+            
+            setTimeout(() => {
+                hideActivationScreen();
+                document.getElementById('demoBanner').style.display = 'none';
+                initFullApp();
+                refreshCurrentView('');
+            }, 1000);
+        } else {
+            statusEl.textContent = '❌ ' + result.message;
+            statusEl.style.color = 'var(--danger)';
+        }
+    } catch {
+        statusEl.textContent = '❌ Cannot connect to server';
+        statusEl.style.color = 'var(--danger)';
+    }
+}
+
+function handleGoogleSignInError() {
+    document.getElementById('activationStatus').textContent = 'Sign-in failed. Try again.';
+    document.getElementById('activationStatus').style.color = 'var(--danger)';
+}
+// ========================
+// LICENSE VERIFICATION (Google Sheets)
+// ========================
+async function verifyLicenseWithServer(email, deviceId) {
+    try {
+        const response = await fetch(LICENSE_CONFIG.botURL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'check',
+                email: email,
+                deviceId: deviceId || generateDeviceFingerprint()
+            })
+        });
+        return await response.json();
+    } catch {
+        return { status: 'error', message: 'Cannot connect to server' };
+    }
+}
 // ========================
 // DOM Ready
 // ========================
@@ -358,7 +373,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
   // Setup activation button
-  document.getElementById('activationSubmitBtn').addEventListener('click', handleActivation);
+  
   document.getElementById('demoBtn').addEventListener('click', enterDemoMode);
   
   // These always run
