@@ -43,18 +43,6 @@ let quizCorrectAnswer = null;
 let quizAnswered = false;
 let quizCategory = 'verbs'; // 'verbs', 'nouns', 'adjectives'
 
-// License state
-let LICENSE_MODE = 'demo'; // 'demo' or 'full'
-let LICENSE_USERNAME = '';
-const LICENSE_CONFIG = {
-    botURL: 'https://script.google.com/macros/s/AKfycbwterXYASmncfOfKhiIeoJDexKCyQFtueLxAZ3WhCd0VzoIuygyoyWUAtrqnE-XbnJu/exec',
-    checkInterval: 7,
-    storageKey: 'rusroots_license'
-};
-const DEMO_LIMIT_ROOTS = 5;
-const DEMO_LIMIT_VERBS = 10;
-const DEMO_LIMIT_NOUNS = 10;
-const DEMO_LIMIT_ADJS = 10;
 
 // ========================
 // Translations
@@ -102,282 +90,13 @@ function applyThemeAndColor() {
 applyThemeAndColor();
 
 // ========================
-// LICENSE SYSTEM
+// DOM Ready (مفتوح بالكامل)
 // ========================
-function generateDeviceFingerprint() {
-    const components = [
-        navigator.userAgent,
-        navigator.language,
-        screen.colorDepth,
-        screen.width + 'x' + screen.height,
-        new Date().getTimezoneOffset(),
-        navigator.hardwareConcurrency || 'unknown',
-        navigator.platform || 'unknown'
-    ];
-    let hash = 0;
-    const str = components.join('|');
-    for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash;
-    }
-    return Math.abs(hash).toString(16);
-}
-
-function getStoredLicense() {
-    try {
-        const data = localStorage.getItem(LICENSE_CONFIG.storageKey);
-        return data ? JSON.parse(data) : null;
-    } catch { return null; }
-}
-
-function storeLicense(data) {
-    localStorage.setItem(LICENSE_CONFIG.storageKey, JSON.stringify(data));
-}
-
-function isLicenseValid(license) {
-    if (!license) return false;
-    const currentFingerprint = generateDeviceFingerprint();
-    if (license.deviceFingerprint !== currentFingerprint) return false;
-    if (Date.now() > license.expiry) return false;
-    return true;
-}
-
-
-
-async function checkLicenseOnStartup() {
-    const license = getStoredLicense();
-    
-    if (license && license.email && isLicenseValid(license)) {
-        const lastCheck = license.lastBotCheck || 0;
-        const daysSinceLastCheck = (Date.now() - lastCheck) / (1000 * 60 * 60 * 24);
-        
-        if (daysSinceLastCheck >= LICENSE_CONFIG.checkInterval) {
-            const result = await verifyLicenseWithServer(license.email, license.deviceFingerprint);
-            if (result.status === 'success') {
-                license.lastBotCheck = Date.now();
-                license.expiry = result.expiry;
-                storeLicense(license);
-                return { allowed: true, mode: 'full', email: license.email };
-            } else {
-                localStorage.removeItem(LICENSE_CONFIG.storageKey);
-                return { allowed: false, mode: 'demo', message: result.message };
-            }
-        }
-        
-        return { allowed: true, mode: 'full', email: license.email };
-    }
-    
-    return { allowed: false, mode: 'demo', needActivation: true };
-}
-
-function showActivationScreen() {
-    document.getElementById('activationScreen').style.display = 'block';
-    document.getElementById('rootCards').style.display = 'none';
-    document.getElementById('demoBanner').style.display = 'none';
-    document.querySelector('.bottom-nav').style.display = 'none';
-    document.getElementById('aboutFloatingBtn').style.display = 'none';
-    document.querySelector('.view-toggle').style.display = 'none';
-}
-
-function hideActivationScreen() {
-    document.getElementById('activationScreen').style.display = 'none';
-    document.querySelector('.bottom-nav').style.display = 'flex';
-    document.getElementById('aboutFloatingBtn').style.display = 'flex';
-}
-
-function showLockedMessage() {
-    const modal = document.getElementById('subscribeModal');
-    modal.style.display = 'block';
-}
-
-function setupSubscribeModal() {
-    const modal = document.getElementById('subscribeModal');
-    if (modal) {
-        modal.querySelector('.close-subscribe-modal').addEventListener('click', () => modal.style.display = 'none');
-        modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
-    }
-}
-
-
-function enterDemoMode() {
-    LICENSE_MODE = 'demo';
-    LICENSE_USERNAME = '';
-    hideActivationScreen();
-    document.getElementById('demoBanner').style.display = 'block';
-    initFullApp();
-    refreshCurrentView('');
-}
-
-function initFullApp() {
-    document.getElementById('rootCards').style.display = 'grid';
-    updateStats();
-}
-
-// Override showPrefixesTable for demo
-const originalShowPrefixesTable = showPrefixesTable;
-showPrefixesTable = function(query) {
-    if (LICENSE_MODE === 'demo') {
-        showLockedMessage();
-        return;
-    }
-    return originalShowPrefixesTable(query);
-};
-
-// Override openModal for demo
-const originalOpenModal = openModal;
-openModal = function(rootKey) {
-    if (LICENSE_MODE === 'demo') {
-        const allowedRoots = Object.keys(ROOTS).slice(0, DEMO_LIMIT_ROOTS);
-        if (!allowedRoots.includes(rootKey)) {
-            showLockedMessage();
-            return;
-        }
-    }
-    return originalOpenModal(rootKey);
-};
-
-// ========================
-// GOOGLE SIGN-IN
-// ========================
-function handleGoogleSignIn(response) {
-    const credential = response.credential;
-    const userInfo = parseJwt(credential);
-    const email = userInfo.email;
-    
-    // Check if email is in allowed list
-    checkEmailAccess(email);
-}
-
-function parseJwt(token) {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-    return JSON.parse(jsonPayload);
-}
-
-async function checkEmailAccess(email) {
-    const statusEl = document.getElementById('activationStatus');
-    statusEl.textContent = 'Verifying...';
-    statusEl.style.color = 'var(--accent)';
-    
-    try {
-        const response = await fetch(`${LICENSE_CONFIG.botURL}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'check',
-                email: email,
-                deviceId: generateDeviceFingerprint()
-            })
-        });
-        const result = await response.json();
-        
-        if (result.status === 'success') {
-            LICENSE_MODE = 'full';
-            LICENSE_USERNAME = email;
-            storeLicense({
-                email: email,
-                deviceFingerprint: generateDeviceFingerprint(),
-                expiry: result.expiry,
-                lastBotCheck: Date.now()
-            });
-            
-            statusEl.textContent = '✅ Access granted!';
-            statusEl.style.color = 'var(--check-color)';
-            
-            setTimeout(() => {
-                hideActivationScreen();
-                document.getElementById('demoBanner').style.display = 'none';
-                initFullApp();
-                refreshCurrentView('');
-            }, 1000);
-        } else {
-            statusEl.textContent = '❌ ' + result.message;
-            statusEl.style.color = 'var(--danger)';
-        }
-    } catch {
-        statusEl.textContent = '❌ Cannot connect to server';
-        statusEl.style.color = 'var(--danger)';
-    }
-}
-
-function handleGoogleSignInError() {
-    document.getElementById('activationStatus').textContent = 'Sign-in failed. Try again.';
-    document.getElementById('activationStatus').style.color = 'var(--danger)';
-}
-// ========================
-// LICENSE VERIFICATION (Google Sheets)
-// ========================
-async function verifyLicenseWithServer(email, deviceId) {
-    try {
-        const response = await fetch(LICENSE_CONFIG.botURL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'check',
-                email: email,
-                deviceId: deviceId || generateDeviceFingerprint()
-            })
-        });
-        return await response.json();
-    } catch {
-        return { status: 'error', message: 'Cannot connect to server' };
-    }
-}
-// ========================
-// DOM Ready
-// ========================
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   setupHeaderScroll();
   setupThemeSwitcher();
   setupModals();
-  setupSubscribeModal();
   setupAboutPage();
-  
-  // Check license
-  const licenseCheck = await checkLicenseOnStartup();
-  
-  if (licenseCheck.mode === 'full') {
-    LICENSE_MODE = 'full';
-    LICENSE_USERNAME = licenseCheck.email;   // <-- التصحيح
-    hideActivationScreen();
-    document.getElementById('demoBanner').style.display = 'none';
-    initFullApp();
-  }
-      else {
-    LICENSE_MODE = 'demo';
-    showActivationScreen();
-  }
-  // Enter key for quiz input
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && quizActive && quizStarted) {
-        const inputField = document.getElementById('quizAnswerInput');
-        const submitBtn = document.getElementById('quizSubmitAnswerBtn');
-        // Check if input is visible (scramble or missing quiz)
-        if (inputField && inputField.offsetParent !== null && !inputField.disabled) {
-            e.preventDefault();
-            submitQuizAnswer();
-        }
-    }
-});
-// Enter key for quiz input
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && quizActive && quizStarted && !quizAnswered) {
-        const inputField = document.getElementById('quizAnswerInput');
-        if (inputField && inputField.offsetParent !== null && !inputField.disabled) {
-            e.preventDefault();
-            submitQuizAnswer();
-        }
-    }
-});
-  // Setup activation button
-  
-  document.getElementById('demoBtn').addEventListener('click', enterDemoMode);
-  
-  // These always run
   setupSearch();
   setupFilters();
   setupSubNav();
@@ -385,17 +104,25 @@ document.addEventListener('keydown', (e) => {
   setupViewToggle();
   setupClearSearch();
   setupQuiz();
-  
-  if (LICENSE_MODE === 'full') {
-    renderRootCards('all', '', 'all');
-    updateAllUITexts();
-    updateStats();
-    toggleViewButtonsVisibility();
-  }
-  
+  renderRootCards('all', '', 'all');
+  updateAllUITexts();
+  updateStats();
+  toggleViewButtonsVisibility();
   updateSubNavUI();
   renderLeaderboard();
+
+  // مفتاح Enter للاختبارات
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && quizActive && quizStarted && !quizAnswered) {
+        const inputField = document.getElementById('quizAnswerInput');
+        if (inputField && inputField.offsetParent !== null && !inputField.disabled) {
+            e.preventDefault();
+            submitQuizAnswer();
+        }
+    }
+  });
 });
+
 // ========================
 // Header Scroll Effect
 // ========================
@@ -512,7 +239,7 @@ function setupFilters() {
         showPrefixesTable('');
       }
       updateStats();
-           toggleViewButtonsVisibility()
+      toggleViewButtonsVisibility();
     });
   });
 }
@@ -641,7 +368,7 @@ function updateAllUITexts() {
     const placeholder = el.getAttribute('data-lang-placeholder-' + currentLanguage);
     if (placeholder) el.placeholder = placeholder;
   });
-updateQuizSettingsTexts();
+  updateQuizSettingsTexts();
 }
 
 function toggleViewButtonsVisibility() {
@@ -746,11 +473,7 @@ function renderRootCards(filter, searchQuery, subFilter) {
   container.innerHTML = '';
   
   let roots = typeof ROOTS !== 'undefined' ? Object.entries(ROOTS) : [];
-    // For demo mode - limit roots
-  if (LICENSE_MODE === 'demo' && subFilter !== 'favorites' && subFilter !== 'completed') {
-    roots = roots.slice(0, DEMO_LIMIT_ROOTS);
-  }
-  
+    
   if (subFilter === 'favorites') {
     roots = roots.filter(([key]) => favoritesRoots.includes(key));
   } else if (subFilter === 'completed') {
@@ -1044,12 +767,7 @@ function renderVerbList(category, searchQuery, subFilter) {
   }
   
   let verbs = [...VERBS_LIST];
-    // For demo mode - limit verbs
-  if (LICENSE_MODE === 'demo') {
-    verbs = verbs.slice(0, DEMO_LIMIT_VERBS);
-    subFilter = 'all';
-  }
-  
+       
   if (subFilter === 'favorites') verbs = verbs.filter(v => favVerbs.includes(v.nsv));
   else if (subFilter === 'completed') verbs = verbs.filter(v => completedVerbs.includes(v.nsv));
   else subFilter = 'all';
@@ -1222,11 +940,7 @@ function renderNounList(category, searchQuery, subFilter) {
   }
   
   let nouns = [...NOUNS_LIST];
-  // For demo mode - limit nouns
-  if (LICENSE_MODE === 'demo') {
-    nouns = nouns.slice(0, DEMO_LIMIT_NOUNS);
-    subFilter = 'all';
-  }
+   
   if (subFilter === 'favorites') nouns = nouns.filter(n => favNouns.includes(n.noun));
   else if (subFilter === 'completed') nouns = nouns.filter(n => completedNouns.includes(n.noun));
   else subFilter = 'all';
@@ -1399,11 +1113,7 @@ function renderAdjectiveList(category, searchQuery, subFilter) {
   }
   
   let adjs = [...ADJ_LIST];
-  // For demo mode - limit adjectives
-  if (LICENSE_MODE === 'demo') {
-    adjs = adjs.slice(0, DEMO_LIMIT_ADJS);
-    subFilter = 'all';
-  }
+  
   if (subFilter === 'favorites') adjs = adjs.filter(a => favAdjectives.includes(a.adj));
   else if (subFilter === 'completed') adjs = adjs.filter(a => completedAdjectives.includes(a.adj));
   else subFilter = 'all';
@@ -1525,7 +1235,7 @@ function toggleCompletedAdjective(adj) {
 }
 
 // ========================
-// QUIZ SYSTEM – FIXED
+// QUIZ SYSTEM
 // ========================
 function setupQuiz() {
   const startBtn = document.getElementById('quizStartBtn');
@@ -1538,14 +1248,7 @@ function setupQuiz() {
   const submitBtn = document.getElementById('quizSubmitAnswerBtn');
   
   if (startBtn) startBtn.addEventListener('click', startQuiz);
-  // For demo mode - limit quiz verbs
-  const originalStartQuiz = startQuiz;
-  startQuiz = function() {
-    if (LICENSE_MODE === 'demo') {
-      // Use demo verbs only
-    }
-    return originalStartQuiz();
-  };  if (backBtn) backBtn.addEventListener('click', exitQuiz);
+  if (backBtn) backBtn.addEventListener('click', exitQuiz);
   if (restartBtn) restartBtn.addEventListener('click', restartQuiz);
   if (backFinishBtn) backFinishBtn.addEventListener('click', exitQuiz);
   if (nextBtn) nextBtn.addEventListener('click', () => { if (quizActive) loadNewQuizQuestion(); });
@@ -1554,19 +1257,9 @@ function setupQuiz() {
   if (submitBtn) submitBtn.addEventListener('click', submitQuizAnswer);
 }
 
-// Enter key submits quiz answer
-document.addEventListener('keydown', function quizEnterHandler(e) {
-    if (e.key === 'Enter' && quizActive && quizStarted && !quizAnswered) {
-        const inputField = document.getElementById('quizAnswerInput');
-        if (inputField && inputField.offsetParent !== null && !inputField.disabled) {
-            e.preventDefault();
-            submitQuizAnswer();
-        }
-    }
-});
+// (Duplicate Enter listener removed; the one inside DOMContentLoaded is sufficient)
 
 function enterQuizView() {
-  // Set quiz category based on current filter
   if (currentFilter === 'nouns') {
     quizCategory = 'nouns';
   } else if (currentFilter === 'adjectives') {
@@ -1581,12 +1274,12 @@ function enterQuizView() {
   quizScore = 0;
   quizMistakes = [];
   clearInterval(quizTimer);
-   updateQuizSettingsTexts();
+  updateQuizSettingsTexts();
   document.getElementById('quizSettingsPanel').style.display = 'block';
   document.getElementById('quizGamePanel').style.display = 'none';
   document.getElementById('quizFinishPanel').style.display = 'none';
   updateQuizUITexts();
-   toggleViewButtonsVisibility();
+  toggleViewButtonsVisibility();
 }
 
 function exitQuiz() {
@@ -1603,7 +1296,7 @@ function exitQuiz() {
   if (rootsBtn) rootsBtn.classList.add('active');
   renderRootCards('all', '', 'all');
   updateStats();
-    toggleViewButtonsVisibility();
+  toggleViewButtonsVisibility();
 }
 
 function startQuiz() {
@@ -1691,7 +1384,6 @@ function loadNewQuizQuestion() {
   if (inputField) inputField.disabled = false;
   if (submitBtn) submitBtn.disabled = false;
   
-  // Get source based on quiz category
   let sourceItems = [];
   
   if (quizCategory === 'verbs') {
@@ -1702,14 +1394,6 @@ function loadNewQuizQuestion() {
     sourceItems = typeof ADJ_LIST !== 'undefined' ? [...ADJ_LIST] : [];
   }
   
-  // For demo mode - limit items
-  if (LICENSE_MODE === 'demo') {
-    if (quizCategory === 'verbs') sourceItems = sourceItems.slice(0, DEMO_LIMIT_VERBS);
-    else if (quizCategory === 'nouns') sourceItems = sourceItems.slice(0, DEMO_LIMIT_NOUNS);
-    else if (quizCategory === 'adjectives') sourceItems = sourceItems.slice(0, DEMO_LIMIT_ADJS);
-  }
-  
-  // Apply source filter (favorites/completed)
   if (quizSource === 'favorites') {
     if (quizCategory === 'verbs') sourceItems = sourceItems.filter(v => favVerbs.includes(v.nsv));
     else if (quizCategory === 'nouns') sourceItems = sourceItems.filter(n => favNouns.includes(n.noun));
@@ -1750,6 +1434,7 @@ function loadNewQuizQuestion() {
     setupMissingQuiz(randomItem);
   }
 }
+
 function setupMeaningQuiz(item) {
   let correctAnswer = '';
   let questionText = '';
@@ -1768,17 +1453,13 @@ function setupMeaningQuiz(item) {
   quizCorrectAnswer = correctAnswer;
   document.querySelector('.quiz-question').innerHTML = questionText;
   
-  // Get wrong options from the same category
   let allItems = [];
   if (quizCategory === 'verbs') {
     allItems = typeof VERBS_LIST !== 'undefined' ? [...VERBS_LIST] : [];
-    if (LICENSE_MODE === 'demo') allItems = allItems.slice(0, DEMO_LIMIT_VERBS);
   } else if (quizCategory === 'nouns') {
     allItems = typeof NOUNS_LIST !== 'undefined' ? [...NOUNS_LIST] : [];
-    if (LICENSE_MODE === 'demo') allItems = allItems.slice(0, DEMO_LIMIT_NOUNS);
   } else if (quizCategory === 'adjectives') {
     allItems = typeof ADJ_LIST !== 'undefined' ? [...ADJ_LIST] : [];
-    if (LICENSE_MODE === 'demo') allItems = allItems.slice(0, DEMO_LIMIT_ADJS);
   }
   
   const allMeanings = allItems
@@ -1802,6 +1483,8 @@ function setupMeaningQuiz(item) {
     optionsContainer.appendChild(btn);
   });
 }
+
+// ---------- CORRECT setupReverseQuiz (only one) ----------
 function setupReverseQuiz(item) {
   let correctText = '';
   let questionText = '';
@@ -1820,17 +1503,13 @@ function setupReverseQuiz(item) {
   quizCorrectAnswer = correctText;
   document.querySelector('.quiz-question').innerHTML = questionText;
   
-  // Get wrong options
   let allItems = [];
   if (quizCategory === 'verbs') {
     allItems = typeof VERBS_LIST !== 'undefined' ? [...VERBS_LIST] : [];
-    if (LICENSE_MODE === 'demo') allItems = allItems.slice(0, DEMO_LIMIT_VERBS);
   } else if (quizCategory === 'nouns') {
     allItems = typeof NOUNS_LIST !== 'undefined' ? [...NOUNS_LIST] : [];
-    if (LICENSE_MODE === 'demo') allItems = allItems.slice(0, DEMO_LIMIT_NOUNS);
   } else if (quizCategory === 'adjectives') {
     allItems = typeof ADJ_LIST !== 'undefined' ? [...ADJ_LIST] : [];
-    if (LICENSE_MODE === 'demo') allItems = allItems.slice(0, DEMO_LIMIT_ADJS);
   }
   
   let allPairs = [];
@@ -1893,7 +1572,6 @@ function setupScrambleQuiz(item) {
   if (submitBtn) submitBtn.disabled = false;
 }
 
-// FIXED: missing letter quiz works for any word length
 function setupMissingQuiz(item) {
   let word = '';
   
@@ -1945,7 +1623,6 @@ function handleQuizAnswer(isCorrect, btn) {
   if (!quizActive || quizAnswered) return;
   quizAnswered = true;
   
-  // Disable input and submit button if they exist
   const inputField = document.getElementById('quizAnswerInput');
   const submitBtn = document.getElementById('quizSubmitAnswerBtn');
   if (inputField) inputField.disabled = true;
@@ -1963,12 +1640,12 @@ function handleQuizAnswer(isCorrect, btn) {
       if (b.textContent === quizCorrectAnswer) b.classList.add('correct');
     });
     
-quizMistakes.push({
-    verb: quizCurrentVerb,
-    quizCategory: quizCategory,
-    userAnswer: btn ? btn.textContent : (inputField ? inputField.value : ''),
-    correctAnswer: quizCorrectAnswer
-});
+    quizMistakes.push({
+      verb: quizCurrentVerb,
+      quizCategory: quizCategory,
+      userAnswer: btn ? btn.textContent : (inputField ? inputField.value : ''),
+      correctAnswer: quizCorrectAnswer
+    });
   }
   
   updateQuizScoreDisplay();
@@ -1983,16 +1660,15 @@ function skipQuizQuestion() {
   if (!quizActive) return;
   quizScore--;
   updateQuizScoreDisplay();
- quizMistakes.push({
+  quizMistakes.push({
     verb: quizCurrentVerb,
     quizCategory: quizCategory,
     userAnswer: '(пропущено)',
     correctAnswer: quizCorrectAnswer
-});
+  });
   document.getElementById('quizFeedback').innerHTML = `<span style="color:var(--text-muted);">Пропущено. Ответ: <strong>${quizCorrectAnswer}</strong></span>`;
   disableAllOptions();
   
-  // Disable input/submit on skip
   const inputField = document.getElementById('quizAnswerInput');
   const submitBtn = document.getElementById('quizSubmitAnswerBtn');
   if (inputField) inputField.disabled = true;
@@ -2021,24 +1697,24 @@ function finishQuiz() {
   const mistakesDiv = document.getElementById('quizMistakesReview');
   if (quizMistakes.length > 0) {
     let mistakesHtml = '<h3>📋 Ошибки:</h3>';
-   quizMistakes.forEach(m => {
-    let itemDisplay = '';
-    if (m.quizCategory === 'nouns') {
+    quizMistakes.forEach(m => {
+      let itemDisplay = '';
+      if (m.quizCategory === 'nouns') {
         itemDisplay = `<strong>${m.verb?.noun || ''}</strong>`;
-    } else if (m.quizCategory === 'adjectives') {
+      } else if (m.quizCategory === 'adjectives') {
         itemDisplay = `<strong>${m.verb?.adjDisplay || m.verb?.adj || ''}</strong>`;
-    } else {
+      } else {
         itemDisplay = `<strong>${m.verb?.nsv || ''} / ${m.verb?.sv || ''}</strong>`;
-    }
-    
-    mistakesHtml += `
+      }
+      
+      mistakesHtml += `
         <div class="mistake-item">
           ${itemDisplay} – 
           ${m.verb?.meaning?.[currentLanguage] || m.verb?.meaning?.en || ''}<br>
           <span class="wrong-answer">Ваш ответ: ${m.userAnswer}</span> → 
           <span class="correct-answer">Правильно: ${m.correctAnswer}</span>
         </div>`;
-});
+    });
     mistakesDiv.innerHTML = mistakesHtml;
   } else {
     mistakesDiv.innerHTML = '<p style="color:var(--check-color);">🎉 Нет ошибок! Отлично!</p>';
@@ -2119,7 +1795,6 @@ function updateQuizSettingsTexts() {
     if (sourceOptions[opt.value]) opt.textContent = sourceOptions[opt.value][currentLanguage];
   }
   
-  // Update labels
   const labels = document.querySelectorAll('#quizSettingsPanel label');
   const labelMap = {
     'Тип теста:': { ru: 'Тип теста:', en: 'Quiz Type:', fr: 'Type de quiz:', ar: 'نوع الاختبار:' },
@@ -2136,6 +1811,7 @@ function updateQuizSettingsTexts() {
     }
   });
 }
+
 function updateQuizUITexts() {
   const labels = document.querySelectorAll('#quizSettingsPanel label');
   const translations = {
