@@ -167,6 +167,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Arabic font when language is switched */
+[lang="ar"] body,
+[lang="ar"] * {
+  font-family: var(--font-ar), serif;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
@@ -181,12 +187,12 @@ body {
   z-index: 100;
   background: var(--gradient-header);
   border-bottom: 1px solid var(--border-subtle);
-  padding: 15px 24px; /* تم تقليص المسافة هنا */
+  padding: 8px 24px;               /* tight vertical padding */
   transition: all var(--transition-smooth);
   box-shadow: 0 2px 20px rgba(0,0,0,0.15);
 }
 #mainHeader.scrolled {
-  padding: 8px 24px;
+  padding: 4px 24px;
 }
 
 .header-inner {
@@ -195,30 +201,26 @@ body {
   justify-content: space-between;
   max-width: 1400px;
   margin: 0 auto;
-  gap: 20px;
+  gap: 12px;
   transition: all var(--transition-smooth);
 }
 
 #mainHeader.scrolled .header-inner {
-  gap: 12px;
-}
-
-#mainHeader.scrolled .header-inner {
-  justify-content: flex-start;   /* بدلاً من space-between */
-  gap: 12px;
+  justify-content: flex-start;
+  gap: 6px;
 }
 
 #mainHeader.scrolled .header-author-block {
-  order: -1;                     /* الصورة تظهر أولاً */
-  gap: 0;                        /* لا مسافة داخلية */
+  order: -1;
+  gap: 0;
 }
 
 #mainHeader.scrolled .dev-names {
-  display: none;                 /* نخفي الاسم تماماً عند التمرير */
+  display: none;
 }
 
 #mainHeader.scrolled .site-title {
-  margin-left: 0;               /* نضمن عدم وجود هامش */
+  margin-left: 0;
 }
 
 /* Title Block */
@@ -285,16 +287,12 @@ body {
 }
 
 #mainHeader.scrolled .dev-photo {
-  width: 24px;           /* صغيرة لكن مرئية */
+  width: 24px;
   height: 24px;
   border-width: 1px;
-  order: -1;
-  opacity: 1;            /* ظاهرة دائماً */
+  opacity: 1;
 }
-#mainHeader.scrolled .header-author-block {
-  order: -1;
-  gap: 0;
-}
+
 .dev-names {
   display: flex;
   flex-direction: column;
@@ -332,14 +330,14 @@ body {
 .header-controls {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 2px;                       /* search and filters almost touching */
   max-width: 1400px;
-  margin: 6px auto 8px;
-  flex-wrap: nowrap;    /* سطر واحد فقط */
+  margin: 0 auto 2px;             /* minimal space above & below the controls row */
+  flex-wrap: nowrap;
 }
 #mainHeader.scrolled .header-controls {
-  margin-top: 4px;
-  gap: 8px;
+  margin-top: 0;
+  gap: 2px;
 }
 
 /* Search */
@@ -510,8 +508,9 @@ body {
    STATS BAR
    ======================== */
 .stats-bar {
-  display: none;   /* إخفاء الشريط بالكامل */
+  display: none;
 }
+
 /* ========================
    MAIN CONTENT - CARDS VIEW
    ======================== */
@@ -840,8 +839,12 @@ body {
   width: 100%;
   height: 100%;
   background: var(--bg-overlay);
-  backdrop-filter: blur(8px);
   animation: fadeIn 0.25s ease;
+}
+@supports (backdrop-filter: blur(8px)) {
+  .modal {
+    backdrop-filter: blur(8px);
+  }
 }
 
 @keyframes fadeIn {
@@ -1558,33 +1561,56 @@ section h3 {
 }
 
 /* ========================
-   RESPONSIVE
+   RESPONSIVE – تصميم الجوال والتابلت
    ======================== */
 @media (max-width: 768px) {
+  /* ===== الجزء العلوي (العنوان + المطور) ===== */
   .header-inner {
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     text-align: center;
+    justify-content: center;       /* يجعل المحتوى في المنتصف */
   }
 
+  /* العناصر الداخلية تأخذ عرض كامل */
+  .header-title-block,
+  .header-author-block {
+    width: 100%;
+    justify-content: center;
+  }
+  .header-author-block {
+    justify-content: center;
+    gap: 12px;
+  }
+
+  /* ===== صف البحث والأزرار ===== */
   .header-controls {
     flex-direction: column;
     align-items: stretch;
+    gap: 6px;                     /* مسافة صغيرة بين الصفوف */
+  }
+
+  /* ـ ترتيب العناصر: الأزرار أولاً، ثم مربع البحث */
+  .filter-bar,
+  .sub-nav-bar,
+  .view-toggle {
+    order: -1;                     /* تظهر فوق مربع البحث */
   }
 
   .search-wrapper {
     max-width: 100%;
+    order: 1;                      /* ينزل تحت */
+    margin-bottom: 0;
   }
 
-  .filter-bar {
+  /* توسيط الأزرار */
+  .filter-bar,
+  .sub-nav-bar,
+  .view-toggle {
     justify-content: center;
   }
 
-  .filter-btn {
-    padding: 6px 10px;
-    font-size: 0.72rem;
-  }
-
+  /* تحسينات عامة */
   .cards-view {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 10px;
@@ -1605,114 +1631,34 @@ section h3 {
     width: 38px;
     height: 38px;
   }
-
-  .about-stats {
-    gap: 12px;
-  }
-
-  .about-stat-item {
-    padding: 12px 16px;
-  }
 }
 
-/* تنسيقات الشاشات الصغيرة فقط */
-@media (max-width: 600px) {
-    .header-controls {
-        gap: 5px !important; /* تقليل المسافة بين العناصر داخل التحكم */
-        padding-top: 0 !important;
-    }
-
-    .search-wrapper {
-        margin-bottom: 0 !important; /* حذف المسافة أسفل صندوق البحث */
-    }
-
-    .filter-bar {
-        margin-top: 5px !important; /* تحكم بسيط في المسافة فوق الأزرار */
-    }
-}
-
-@media (max-width: 600px) {
-    /* التنسيق عند التمرير ليكون العنوان والصورة بجانب بعضهما */
-    #mainHeader.scrolled .header-inner {
-        flex-direction: row !important; /* جعل العناصر بجانب بعضها */
-        justify-content: flex-start;
-        align-items: center;
-        padding: 5px 10px;
-        gap: 15px;
-    }
-
-    #mainHeader.scrolled #devPhoto {
-        width: 40px !important; /* تصغير حجم الصورة لتناسب السطر */
-        height: 40px !important;
-        margin-bottom: 0 !important;
-    }
-
-    #mainHeader.scrolled .site-title {
-        font-size: 1.1rem !important; /* تصغير الخط قليلاً ليناسب العرض */
-        margin: 0 !important;
-        white-space: nowrap; /* منع انقسام العنوان لسطرين */
-    }
-
-    /* إخفاء الوصف الفرعي واسم المطور عند التمرير لتوفير مساحة */
-    #mainHeader.scrolled .site-subtitle,
-    #mainHeader.scrolled .dev-names {
-        display: none;
-    }
-}
-
+/* ===== الهواتف الأصغر (حتى 480px) ===== */
 @media (max-width: 480px) {
-  /* إخفاء السطرين الفرعيين */
-  .site-subtitle,
-  .dev-names {
-    display: none;
-  }
-
   #mainHeader {
-    padding: 6px 10px 4px;
+    padding: 8px 10px 4px;
   }
 
-   /* صف واحد: الصورة + العنوان */
   .header-inner {
-    flex-direction: row !important;
     gap: 6px;
-    align-items: center;
-    justify-content: flex-start;
   }
 
   .dev-photo {
-    width: 32px;
-    height: 32px;
-    order: -1;           /* يظهر اليسار */
-    margin-right: 0;
+    width: 30px;
+    height: 30px;
   }
 
   .site-title {
     font-size: 1rem;
-    flex: 1;             /* يأخذ المساحة المتبقية */
   }
 
-  /* صف التحكم أسفل العنوان مباشرة */
-    .header-controls {
-    margin-top: 2px;
-    gap: 2px;
-    flex-wrap: wrap;
-  }
-
-  .search-wrapper {
-    flex: 1 1 100%;
-    min-width: auto;
+  .header-controls {
+    gap: 4px;
   }
 
   #searchInput {
     padding: 6px 30px 6px 10px;
     font-size: 0.75rem;
-  }
-
-  .filter-bar,
-  .sub-nav-bar,
-  .view-toggle {
-    margin-top: 2px;
-    gap: 2px;
   }
 
   .filter-btn {
@@ -1731,7 +1677,6 @@ section h3 {
     font-size: 0.9rem;
   }
 
-  /* المحتوى */
   .cards-view {
     grid-template-columns: 1fr 1fr;
     gap: 6px;
@@ -1742,5 +1687,47 @@ section h3 {
     grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
     gap: 6px;
     padding: 10px 8px;
+  }
+}
+
+/* ===== حالة التمرير (scrolled) على الجوال ===== */
+@media (max-width: 768px) {
+  #mainHeader.scrolled {
+    padding: 4px 12px;
+  }
+
+  #mainHeader.scrolled .header-inner {
+    flex-direction: row !important;   /* صورة + عنوان في سطر واحد */
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+  }
+
+  #mainHeader.scrolled .dev-photo {
+    width: 32px;
+    height: 32px;
+    order: -1;                       /* الصورة على اليسار */
+    margin: 0;
+  }
+
+  #mainHeader.scrolled .header-author-block {
+    order: -1;
+    width: auto;
+  }
+
+  #mainHeader.scrolled .header-title-block {
+    flex: 1;
+  }
+
+  #mainHeader.scrolled .site-subtitle,
+  #mainHeader.scrolled .dev-names,
+  #mainHeader.scrolled .header-controls {
+    display: none;                   /* إخفاء المحتوى الإضافي */
+  }
+
+  #mainHeader.scrolled .site-title {
+    font-size: 1rem;
+    white-space: nowrap;
   }
 }
