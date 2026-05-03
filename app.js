@@ -157,7 +157,7 @@ function setupHeaderScroll() {
             lastToggleTime = now;
           }
           // إخفاء الهيدر عند السحب للأسفل (أكثر من 5px) وهو ظاهر وتجاوزنا 60px
-          else if (!isScrolled && delta > 5 && currentScrollY > 60) {
+          else if (!isScrolled && delta > 5 && currentScrollY > 10) {
             mainHeader.classList.add('scrolled');
             lastToggleTime = now;
           }
