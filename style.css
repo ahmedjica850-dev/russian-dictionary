@@ -1662,172 +1662,85 @@ section h3 {
 }
 
 @media (max-width: 480px) {
-  /* ========== الأساسيات ========== */
   .site-subtitle,
   .dev-names {
-    display: flex !important;
+    display: none;
   }
 
-  /* ========== الهيدر الرئيسي ========== */
+  /* إجبار الهيدر على عدم وجود أي فراغ */
   #mainHeader {
-    padding: 8px 12px 4px !important;
-    transition: padding 0.3s;
-  }
-  #mainHeader.scrolled {
-    padding: 4px 8px !important;
+    padding: 2px 8px !important;
   }
 
   .header-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row !important;
     gap: 4px;
-    text-align: center;
-  }
-
-  .header-title-block {
-    order: 1;
-    width: 100%;
-  }
-  .site-title {
-    font-size: 1rem;
-    margin-bottom: 2px;
-  }
-  .site-subtitle {
-    font-size: 0.7rem;
-    margin-bottom: 2px;
-    color: var(--text-muted);
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 !important;
   }
 
   .header-author-block {
-    order: 2;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    width: 100%;
-  }
-  .dev-photo {
-    width: 32px;
-    height: 32px;
-    margin: 0;
-  }
-  .dev-names {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .dev-name-main {
-    font-size: 0.8rem;
-  }
-  .dev-name-sub {
-    font-size: 0.65rem;
-  }
-
-  /* عند التمرير */
-  #mainHeader.scrolled .site-subtitle,
-  #mainHeader.scrolled .dev-names {
-    display: none !important;
-  }
-  #mainHeader.scrolled .header-inner {
-    flex-direction: row !important;
-    justify-content: flex-start;
-    gap: 6px;
-    padding: 0 4px;
-  }
-  #mainHeader.scrolled .header-author-block {
     order: -1;
-    width: auto;
-  }
-  #mainHeader.scrolled .dev-photo {
-    width: 24px;
-    height: 24px;
-  }
-  #mainHeader.scrolled .header-title-block {
-    order: 2;
-    text-align: left;
-    flex: 1;
-  }
-  #mainHeader.scrolled .site-title {
-    font-size: 0.85rem;
     margin: 0;
-    white-space: nowrap;
   }
 
-  /* ========== صف التحكم (بحث + أزرار) ========== */
+  .dev-photo {
+    width: 28px;
+    height: 28px;
+    margin-right: 0;
+  }
+
+  .header-title-block {
+    flex: 1;
+    margin: 0;
+  }
+
+  .site-title {
+    font-size: 0.9rem;
+    margin: 0;
+  }
+
+  /* إزالة كافة الفراغات بين البحث والأزرار */
   .header-controls {
-    display: flex;
-    flex-direction: column !important;
-    gap: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
-    width: 100%;
+    gap: 0;
+    flex-wrap: nowrap;
+    flex-direction: row;
   }
-
   .search-wrapper {
     margin: 0 !important;
-    padding: 0;
-    width: 100%;
+    flex: 1 1 auto;
   }
   #searchInput {
+    padding: 6px 30px 6px 8px;
+    font-size: 0.7rem;
     margin: 0;
-    padding: 6px 30px 6px 10px;
-    font-size: 0.75rem;
-    height: 34px;
-    border-radius: 20px;
+    height: 28px;
   }
-
   .filter-bar,
   .sub-nav-bar,
   .view-toggle {
     margin: 0 !important;
-    padding: 2px 4px !important;
-    gap: 2px;
-    background: var(--bg-secondary);
-    border-radius: 20px;
-    border: 1px solid var(--border-card);
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    padding: 2px !important;
+    gap: 1px;
   }
-
-  .filter-btn,
-  .sub-nav-btn {
-    margin: 0;
+  .filter-btn {
     padding: 4px 6px;
-    font-size: 0.62rem;
-    border-radius: 12px;
+    font-size: 0.6rem;
   }
-
-  .view-toggle {
-    display: flex;
-    justify-content: center;
-    gap: 2px;
-    padding: 2px;
-    margin: 0;
+  .sub-nav-btn {
+    padding: 4px 6px;
+    font-size: 0.6rem;
   }
   .view-btn {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     font-size: 0.8rem;
   }
 
-  /* ========== الذيل ========== */
-  .bottom-nav {
-    padding: 6px 10px;
-    gap: 6px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .theme-btn,
-  .lang-btn {
-    width: 30px;
-    height: 30px;
-    font-size: 0.7rem;
-  }
-
-  /* ========== المحتوى ========== */
+  /* البطاقات */
   .cards-view {
     grid-template-columns: 1fr 1fr;
     gap: 6px;
