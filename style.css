@@ -187,7 +187,7 @@ body {
   z-index: 100;
   background: var(--gradient-header);
   border-bottom: 1px solid var(--border-subtle);
-  padding: 8px 24px;               /* tight vertical padding */
+  padding: 8px 24px;
   transition: all var(--transition-smooth);
   box-shadow: 0 2px 20px rgba(0,0,0,0.15);
 }
@@ -330,9 +330,9 @@ body {
 .header-controls {
   display: flex;
   align-items: center;
-  gap: 2px;                       /* search and filters almost touching */
+  gap: 2px;
   max-width: 1400px;
-  margin: 0 auto 2px;             /* minimal space above & below the controls row */
+  margin: 0 auto 2px;
   flex-wrap: nowrap;
 }
 #mainHeader.scrolled .header-controls {
@@ -1570,11 +1570,10 @@ section h3 {
     text-align: center;
   }
 
-  /* Stack search and filters vertically with tiny gap */
   .header-controls {
     flex-direction: column;
     align-items: stretch;
-    gap: 2px;              /* ← this fixes the big space */
+    gap: 2px;
   }
 
   .search-wrapper {
@@ -1620,135 +1619,105 @@ section h3 {
   }
 }
 
-/* تنسيقات الشاشات الصغيرة فقط */
-@media (max-width: 600px) {
-  #mainHeader .header-controls {
-    gap: 0;
-    padding-top: 0;
-  }
-
-  .search-wrapper {
-    margin-bottom: 0;
-  }
-
-  .filter-bar {
-    margin-top: 0;
-  }
-
-  #mainHeader.scrolled .header-inner {
-    flex-direction: row !important;
-    justify-content: flex-start;
-    align-items: center;
-    padding: 5px 10px;
-    gap: 0px;
-  }
-
-  #mainHeader.scrolled #devPhoto {
-    width: 40px !important;
-    height: 40px !important;
-    margin-bottom: 0 !important;
-  }
-
-  #mainHeader.scrolled .site-title {
-    font-size: 1.1rem !important;
-    margin: 0 !important;
-    white-space: nowrap;
-  }
-
-  #mainHeader.scrolled .site-subtitle,
-  #mainHeader.scrolled .dev-names {
-    display: none;
-  }
-}
 
 @media (max-width: 480px) {
+  /* إخفاء السطر الفرعي واسم المطور */
   .site-subtitle,
   .dev-names {
-    display: none;
+    display: none !important;
   }
 
-  /* إجبار الهيدر على عدم وجود أي فراغ */
+  /* تصغير الهيدر */
   #mainHeader {
-    padding: 2px 8px !important;
+    padding: 6px 8px 4px;
+  }
+  #mainHeader.scrolled {
+    padding: 2px 8px;
   }
 
   .header-inner {
-    flex-direction: row !important;
+    flex-direction: row;           /* يظل العنوان والصورة في صف واحد */
     gap: 4px;
     align-items: center;
-    justify-content: flex-start;
-    padding: 0 !important;
   }
-
-  .header-author-block {
-    order: -1;
-    margin: 0;
-  }
-
   .dev-photo {
-    width: 28px;
-    height: 28px;
-    margin-right: 0;
+    width: 24px;
+    height: 24px;
+    margin-right: 4px;
   }
-
-  .header-title-block {
-    flex: 1;
-    margin: 0;
-  }
-
   .site-title {
     font-size: 0.9rem;
-    margin: 0;
   }
 
-  /* إزالة كافة الفراغات بين البحث والأزرار */
+  /* صف التحكم – بحث + أزرار */
   .header-controls {
-    margin: 0 !important;
-    padding: 0 !important;
-    gap: 0;
-    flex-wrap: nowrap;
-    flex-direction: row;
+    display: flex;
+    flex-direction: column;
+    gap: 0 !important;            /* لا فراغات بين العناصر */
+    margin-top: 2px !important;   /* مسافة صغيرة عن العنوان */
+    padding: 0;
   }
+
   .search-wrapper {
-    margin: 0 !important;
-    flex: 1 1 auto;
+    width: 100%;
   }
   #searchInput {
     padding: 6px 30px 6px 8px;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
+    height: 32px;
+    border-radius: 16px;
     margin: 0;
-    height: 28px;
+    box-sizing: border-box;
   }
+
+  /* أشرطة الأزرار */
   .filter-bar,
   .sub-nav-bar,
   .view-toggle {
-    margin: 0 !important;
-    padding: 2px !important;
-    gap: 1px;
-  }
-  .filter-btn {
-    padding: 4px 6px;
-    font-size: 0.6rem;
-  }
-  .sub-nav-btn {
-    padding: 4px 6px;
-    font-size: 0.6rem;
-  }
-  .view-btn {
-    width: 24px;
-    height: 24px;
-    font-size: 0.8rem;
+    display: flex;
+    gap: 2px;
+    margin: 0 !important;         /* لا مسافات خارجية */
+    padding: 2px;                 /* فقط حشوة بسيطة */
+    border: 1px solid var(--border-card);
+    border-radius: 16px;
+    background: var(--bg-secondary);
+    justify-content: center;
   }
 
-  /* البطاقات */
+  .filter-btn,
+  .sub-nav-btn {
+    padding: 3px 6px;
+    font-size: 0.6rem;
+    border-radius: 12px;
+  }
+
+  .view-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 0.7rem;
+  }
+
+  /* الذيل */
+  .bottom-nav {
+    padding: 4px 8px;
+    gap: 6px;
+  }
+  .theme-btn,
+  .lang-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.65rem;
+  }
+
+  /* المحتوى */
   .cards-view {
     grid-template-columns: 1fr 1fr;
     gap: 6px;
-    padding: 10px 8px;
+    padding: 8px;
   }
   .category-cards {
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
     gap: 6px;
-    padding: 10px 8px;
+    padding: 8px;
   }
 }

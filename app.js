@@ -1895,3 +1895,19 @@ function escapeHtml(str) {
   div.textContent = str;
   return div.innerHTML;
 }
+// إزالة أي مسافات زائدة في الجوال بعد التحميل (حل نهائي)
+(function() {
+  function fixMobileHeader() {
+    if (window.innerWidth > 480) return;
+    const controls = document.querySelector('.header-controls');
+    if (!controls) return;
+    controls.style.gap = '0px';
+    controls.style.padding = '0px';
+    const children = controls.children;
+    for (let el of children) {
+      el.style.margin = '0px';
+    }
+  }
+  window.addEventListener('load', fixMobileHeader);
+  window.addEventListener('resize', fixMobileHeader);
+})();
