@@ -167,12 +167,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Arabic font when language is switched */
-[lang="ar"] body,
-[lang="ar"] * {
-  font-family: var(--font-ar), serif;
-}
-
 /* Scrollbar */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
@@ -187,12 +181,12 @@ body {
   z-index: 100;
   background: var(--gradient-header);
   border-bottom: 1px solid var(--border-subtle);
-  padding: 8px 24px;
+  padding: 15px 24px; /* تم تقليص المسافة هنا */
   transition: all var(--transition-smooth);
   box-shadow: 0 2px 20px rgba(0,0,0,0.15);
 }
 #mainHeader.scrolled {
-  padding: 4px 24px;
+  padding: 8px 24px;
 }
 
 .header-inner {
@@ -201,26 +195,30 @@ body {
   justify-content: space-between;
   max-width: 1400px;
   margin: 0 auto;
-  gap: 12px;
+  gap: 20px;
   transition: all var(--transition-smooth);
 }
 
 #mainHeader.scrolled .header-inner {
-  justify-content: flex-start;
-  gap: 6px;
+  gap: 12px;
+}
+
+#mainHeader.scrolled .header-inner {
+  justify-content: flex-start;   /* بدلاً من space-between */
+  gap: 12px;
 }
 
 #mainHeader.scrolled .header-author-block {
-  order: -1;
-  gap: 0;
+  order: -1;                     /* الصورة تظهر أولاً */
+  gap: 0;                        /* لا مسافة داخلية */
 }
 
 #mainHeader.scrolled .dev-names {
-  display: none;
+  display: none;                 /* نخفي الاسم تماماً عند التمرير */
 }
 
 #mainHeader.scrolled .site-title {
-  margin-left: 0;
+  margin-left: 0;               /* نضمن عدم وجود هامش */
 }
 
 /* Title Block */
@@ -287,12 +285,16 @@ body {
 }
 
 #mainHeader.scrolled .dev-photo {
-  width: 24px;
+  width: 24px;           /* صغيرة لكن مرئية */
   height: 24px;
   border-width: 1px;
-  opacity: 1;
+  order: -1;
+  opacity: 1;            /* ظاهرة دائماً */
 }
-
+#mainHeader.scrolled .header-author-block {
+  order: -1;
+  gap: 0;
+}
 .dev-names {
   display: flex;
   flex-direction: column;
@@ -330,14 +332,14 @@ body {
 .header-controls {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 12px;
   max-width: 1400px;
-  margin: 0 auto 2px;
-  flex-wrap: nowrap;
+  margin: 6px auto 8px;
+  flex-wrap: nowrap;    /* سطر واحد فقط */
 }
 #mainHeader.scrolled .header-controls {
-  margin-top: 0;
-  gap: 2px;
+  margin-top: 4px;
+  gap: 8px;
 }
 
 /* Search */
@@ -508,9 +510,8 @@ body {
    STATS BAR
    ======================== */
 .stats-bar {
-  display: none;
+  display: none;   /* إخفاء الشريط بالكامل */
 }
-
 /* ========================
    MAIN CONTENT - CARDS VIEW
    ======================== */
@@ -839,12 +840,8 @@ body {
   width: 100%;
   height: 100%;
   background: var(--bg-overlay);
+  backdrop-filter: blur(8px);
   animation: fadeIn 0.25s ease;
-}
-@supports (backdrop-filter: blur(8px)) {
-  .modal {
-    backdrop-filter: blur(8px);
-  }
 }
 
 @keyframes fadeIn {
@@ -1573,7 +1570,6 @@ section h3 {
   .header-controls {
     flex-direction: column;
     align-items: stretch;
-    gap: 2px;
   }
 
   .search-wrapper {
@@ -1619,105 +1615,132 @@ section h3 {
   }
 }
 
+/* تنسيقات الشاشات الصغيرة فقط */
+@media (max-width: 600px) {
+    .header-controls {
+        gap: 5px !important; /* تقليل المسافة بين العناصر داخل التحكم */
+        padding-top: 0 !important;
+    }
+
+    .search-wrapper {
+        margin-bottom: 0 !important; /* حذف المسافة أسفل صندوق البحث */
+    }
+
+    .filter-bar {
+        margin-top: 5px !important; /* تحكم بسيط في المسافة فوق الأزرار */
+    }
+}
+
+@media (max-width: 600px) {
+    /* التنسيق عند التمرير ليكون العنوان والصورة بجانب بعضهما */
+    #mainHeader.scrolled .header-inner {
+        flex-direction: row !important; /* جعل العناصر بجانب بعضها */
+        justify-content: flex-start;
+        align-items: center;
+        padding: 5px 10px;
+        gap: 15px;
+    }
+
+    #mainHeader.scrolled #devPhoto {
+        width: 40px !important; /* تصغير حجم الصورة لتناسب السطر */
+        height: 40px !important;
+        margin-bottom: 0 !important;
+    }
+
+    #mainHeader.scrolled .site-title {
+        font-size: 1.1rem !important; /* تصغير الخط قليلاً ليناسب العرض */
+        margin: 0 !important;
+        white-space: nowrap; /* منع انقسام العنوان لسطرين */
+    }
+
+    /* إخفاء الوصف الفرعي واسم المطور عند التمرير لتوفير مساحة */
+    #mainHeader.scrolled .site-subtitle,
+    #mainHeader.scrolled .dev-names {
+        display: none;
+    }
+}
 
 @media (max-width: 480px) {
-  /* إخفاء السطر الفرعي واسم المطور */
+  /* إخفاء السطرين الفرعيين */
   .site-subtitle,
   .dev-names {
-    display: none !important;
+    display: none;
   }
 
-  /* تصغير الهيدر */
   #mainHeader {
-    padding: 6px 8px 4px;
-  }
-  #mainHeader.scrolled {
-    padding: 2px 8px;
+    padding: 6px 10px 4px;
   }
 
+   /* صف واحد: الصورة + العنوان */
   .header-inner {
-    flex-direction: row;           /* يظل العنوان والصورة في صف واحد */
-    gap: 4px;
+    flex-direction: row !important;
+    gap: 6px;
     align-items: center;
-  }
-  .dev-photo {
-    width: 24px;
-    height: 24px;
-    margin-right: 4px;
-  }
-  .site-title {
-    font-size: 0.9rem;
+    justify-content: flex-start;
   }
 
-  /* صف التحكم – بحث + أزرار */
-  .header-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 0 !important;            /* لا فراغات بين العناصر */
-    margin-top: 2px !important;   /* مسافة صغيرة عن العنوان */
-    padding: 0;
+  .dev-photo {
+    width: 32px;
+    height: 32px;
+    order: -1;           /* يظهر اليسار */
+    margin-right: 0;
+  }
+
+  .site-title {
+    font-size: 1rem;
+    flex: 1;             /* يأخذ المساحة المتبقية */
+  }
+
+  /* صف التحكم أسفل العنوان مباشرة */
+    .header-controls {
+    margin-top: 2px;
+    gap: 2px;
+    flex-wrap: wrap;
   }
 
   .search-wrapper {
-    width: 100%;
-  }
-  #searchInput {
-    padding: 6px 30px 6px 8px;
-    font-size: 0.75rem;
-    height: 32px;
-    border-radius: 16px;
-    margin: 0;
-    box-sizing: border-box;
+    flex: 1 1 100%;
+    min-width: auto;
   }
 
-  /* أشرطة الأزرار */
+  #searchInput {
+    padding: 6px 30px 6px 10px;
+    font-size: 0.75rem;
+  }
+
   .filter-bar,
   .sub-nav-bar,
   .view-toggle {
-    display: flex;
+    margin-top: 2px;
     gap: 2px;
-    margin: 0 !important;         /* لا مسافات خارجية */
-    padding: 2px;                 /* فقط حشوة بسيطة */
-    border: 1px solid var(--border-card);
-    border-radius: 16px;
-    background: var(--bg-secondary);
-    justify-content: center;
   }
 
-  .filter-btn,
+  .filter-btn {
+    padding: 5px 8px;
+    font-size: 0.65rem;
+  }
+
   .sub-nav-btn {
-    padding: 3px 6px;
-    font-size: 0.6rem;
-    border-radius: 12px;
+    padding: 4px 7px;
+    font-size: 0.65rem;
   }
 
   .view-btn {
-    width: 26px;
-    height: 26px;
-    font-size: 0.7rem;
-  }
-
-  /* الذيل */
-  .bottom-nav {
-    padding: 4px 8px;
-    gap: 6px;
-  }
-  .theme-btn,
-  .lang-btn {
     width: 28px;
     height: 28px;
-    font-size: 0.65rem;
+    font-size: 0.9rem;
   }
 
   /* المحتوى */
   .cards-view {
     grid-template-columns: 1fr 1fr;
     gap: 6px;
-    padding: 8px;
+    padding: 10px 8px;
   }
+
   .category-cards {
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
     gap: 6px;
-    padding: 8px;
+    padding: 10px 8px;
   }
 }
