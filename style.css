@@ -343,7 +343,7 @@ body {
 /* Search */
 .search-wrapper {
   position: relative;
-  flex: 1 1 200px;
+  flex: 1 1 10px;
   min-width: 180px;
   max-width: 320px;
 }
@@ -1572,6 +1572,33 @@ section h3 {
     justify-content: center;       /* يجعل المحتوى في المنتصف */
   }
 
+    /* إزالة المسافات تماماً */
+  .header-controls {
+    margin-bottom: 0 !important;  /* لا مسافة تحت شريط التحكم */
+  }
+
+  /* إزالة المسافة العلوية من حاوية المحتوى الرئيسي */
+  #rootCards,
+  #rootCards.cards-view,
+  #rootCards.list-view {
+    padding-top: 0 !important;    /* لصق المحتوى مباشرة تحت البحث */
+    margin-top: 0 !important;
+  }
+
+  /* إزالة أي هامش سفلي من الهيدر نفسه */
+  #mainHeader {
+    margin-bottom: 0;
+    padding-bottom: 4px;
+  }
+
+     /* فاصل جمالي بين المطور والأزرار */
+  .header-controls {
+    border-top: 2px solid var(--accent);
+    padding-top: 10px;
+    margin-top: 8px;
+  }
+
+
   /* العناصر الداخلية تأخذ عرض كامل */
   .header-title-block,
   .header-author-block {
@@ -1641,6 +1668,13 @@ section h3 {
 
   .header-inner {
     gap: 6px;
+  }
+
+  #mainHeader {
+    margin-bottom: 0;
+  }
+  #rootCards, #rootCards.cards-view, #rootCards.list-view {
+    padding-top: 0 !important;
   }
 
   .dev-photo {

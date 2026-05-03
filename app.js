@@ -128,11 +128,39 @@ document.addEventListener('DOMContentLoaded', () => {
 // ========================
 function setupHeaderScroll() {
   const mainHeader = document.getElementById('mainHeader');
+  let lastScrollY = window.scrollY;
+  let ticking = false;
+
   window.addEventListener('scroll', () => {
-    if (window.scrollY > 60) {
-      mainHeader.classList.add('scrolled');
-    } else {
-      mainHeader.classList.remove('scrolled');
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        const currentScrollY = window.scrollY;
+        const isMobile = window.innerWidth <= 768;  // الحد الفاصل بين الجوال واللاب توب
+
+        if (isMobile) {
+          // السلوك الذكي للجوال
+          if (currentScrollY > 60 && currentScrollY > lastScrollY) {
+            mainHeader.classList.add('scrolled');
+          } else if (currentScrollY < lastScrollY) {
+            mainHeader.classList.remove('scrolled');
+          }
+          // إظهار كامل عند بداية الصفحة
+          if (currentScrollY <= 10) {
+            mainHeader.classList.remove('scrolled');
+          }
+        } else {
+          // السلوك الحالي للشاشات الكبيرة
+          if (currentScrollY > 60) {
+            mainHeader.classList.add('scrolled');
+          } else {
+            mainHeader.classList.remove('scrolled');
+          }
+        }
+
+        lastScrollY = currentScrollY;
+        ticking = false;
+      });
+      ticking = true;
     }
   });
 }
