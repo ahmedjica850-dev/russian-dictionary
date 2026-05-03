@@ -1663,42 +1663,36 @@ section h3 {
 
 @media (max-width: 480px) {
   /* ========== الأساسيات ========== */
-  /* إظهار العناصر التي تم إخفاؤها سابقاً */
   .site-subtitle,
   .dev-names {
-    display: flex !important;      /* إظهار اسم المطور والسطر الفرعي */
+    display: flex !important;
   }
 
   /* ========== الهيدر الرئيسي ========== */
   #mainHeader {
-    padding: 10px 12px 6px;        /* هيدر بحجم طبيعي مريح */
+    padding: 8px 12px 4px !important;
     transition: padding 0.3s;
   }
-
-  /* عند التمرير يصبح أصغر */
   #mainHeader.scrolled {
     padding: 4px 8px !important;
   }
 
   .header-inner {
     display: flex;
-    flex-direction: column;        /* العناصر عمودية بالترتيب الطبيعي */
-    align-items: center;           /* توسيط المحتوى */
+    flex-direction: column;
+    align-items: center;
     gap: 4px;
     text-align: center;
   }
 
-  /* إعادة ترتيب العناصر داخل الهيدر */
   .header-title-block {
     order: 1;
     width: 100%;
   }
-
   .site-title {
-    font-size: 1.1rem;
+    font-size: 1rem;
     margin-bottom: 2px;
   }
-
   .site-subtitle {
     font-size: 0.7rem;
     margin-bottom: 2px;
@@ -1706,7 +1700,7 @@ section h3 {
   }
 
   .header-author-block {
-    order: 2;                      /* الصورة والاسم أسفل العنوان */
+    order: 2;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -1714,72 +1708,60 @@ section h3 {
     gap: 6px;
     width: 100%;
   }
-
   .dev-photo {
     width: 32px;
     height: 32px;
     margin: 0;
   }
-
   .dev-names {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
   }
-
   .dev-name-main {
     font-size: 0.8rem;
   }
-
   .dev-name-sub {
     font-size: 0.65rem;
   }
 
-  /* عند التمرير: إخفاء اسم المطور والسطر الفرعي */
+  /* عند التمرير */
   #mainHeader.scrolled .site-subtitle,
   #mainHeader.scrolled .dev-names {
     display: none !important;
   }
-
   #mainHeader.scrolled .header-inner {
-    flex-direction: row !important;    /* تصبح العناصر في صف واحد */
+    flex-direction: row !important;
     justify-content: flex-start;
     gap: 6px;
     padding: 0 4px;
   }
-
   #mainHeader.scrolled .header-author-block {
-    order: -1;                         /* الصورة تنتقل لليسار */
+    order: -1;
     width: auto;
   }
-
   #mainHeader.scrolled .dev-photo {
     width: 24px;
     height: 24px;
   }
-
   #mainHeader.scrolled .header-title-block {
     order: 2;
     text-align: left;
     flex: 1;
   }
-
   #mainHeader.scrolled .site-title {
     font-size: 0.85rem;
     margin: 0;
     white-space: nowrap;
   }
 
-@media (max-width: 480px) {
-  /* ... الإعدادات الأخرى تبقى كما هي ... */
-
   /* ========== صف التحكم (بحث + أزرار) ========== */
   .header-controls {
     display: flex;
-    flex-direction: column !important;  /* نضمن العمودية */
-    gap: 0 !important;                  /* لا مسافات بين العناصر */
-    margin: 0 !important;               /* لا هامش خارجي */
-    padding: 0 !important;              /* لا حشوة داخلية */
+    flex-direction: column !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
     width: 100%;
   }
 
@@ -1788,7 +1770,6 @@ section h3 {
     padding: 0;
     width: 100%;
   }
-
   #searchInput {
     margin: 0;
     padding: 6px 30px 6px 10px;
@@ -1797,12 +1778,11 @@ section h3 {
     border-radius: 20px;
   }
 
-  /* الأزرار: لا مسافات علوية أو سفلية */
   .filter-bar,
   .sub-nav-bar,
   .view-toggle {
     margin: 0 !important;
-    padding: 2px 4px !important;        /* فقط حشوة داخلية بسيطة */
+    padding: 2px 4px !important;
     gap: 2px;
     background: var(--bg-secondary);
     border-radius: 20px;
@@ -1815,15 +1795,11 @@ section h3 {
   .filter-btn,
   .sub-nav-btn {
     margin: 0;
-  }
-}
-  .sub-nav-btn {
     padding: 4px 6px;
     font-size: 0.62rem;
     border-radius: 12px;
   }
 
-  /* زر عرض البطاقات / القائمة */
   .view-toggle {
     display: flex;
     justify-content: center;
@@ -1831,21 +1807,19 @@ section h3 {
     padding: 2px;
     margin: 0;
   }
-
   .view-btn {
     width: 28px;
     height: 28px;
     font-size: 0.8rem;
   }
 
-  /* ========== الذيل (شريط التنسيق) ========== */
+  /* ========== الذيل ========== */
   .bottom-nav {
     padding: 6px 10px;
     gap: 6px;
     flex-wrap: wrap;
     justify-content: center;
   }
-
   .theme-btn,
   .lang-btn {
     width: 30px;
@@ -1859,7 +1833,6 @@ section h3 {
     gap: 6px;
     padding: 10px 8px;
   }
-
   .category-cards {
     grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
     gap: 6px;
