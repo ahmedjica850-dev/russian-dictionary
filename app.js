@@ -129,31 +129,52 @@ document.addEventListener('DOMContentLoaded', () => {
 function setupHeaderScroll() {
   const mainHeader = document.getElementById('mainHeader');
   let lastScrollY = window.scrollY;
+  let lastToggleTime = 0;
+  const cooldown = 250; // مللي ثانية بين كل تغيير
   let ticking = false;
 
   window.addEventListener('scroll', () => {
     if (!ticking) {
       window.requestAnimationFrame(() => {
         const currentScrollY = window.scrollY;
-        const isMobile = window.innerWidth <= 768;  // الحد الفاصل بين الجوال واللاب توب
+        const isMobile = window.innerWidth <= 768;
+        const now = Date.now();
 
         if (isMobile) {
-          // السلوك الذكي للجوال
-          if (currentScrollY > 60 && currentScrollY > lastScrollY) {
-            mainHeader.classList.add('scrolled');
-          } else if (currentScrollY < lastScrollY) {
-            mainHeader.classList.remove('scrolled');
+          const delta = currentScrollY - lastScrollY;
+          const isScrolled = mainHeader.classList.contains('scrolled');
+
+          // تجنب التبديل إذا لم تمر فترة التهدئة
+          if (now - lastToggleTime < cooldown) {
+            lastScrollY = currentScrollY;
+            ticking = false;
+            return;
           }
-          // إظهار كامل عند بداية الصفحة
-          if (currentScrollY <= 10) {
+
+          // إظهار الهيدر عند السحب للأعلى (أكثر من 5px) وهو مخفي حالياً
+          if (isScrolled && delta < -5) {
             mainHeader.classList.remove('scrolled');
+            lastToggleTime = now;
+          }
+          // إخفاء الهيدر عند السحب للأسفل (أكثر من 5px) وهو ظاهر وتجاوزنا 60px
+          else if (!isScrolled && delta > 5 && currentScrollY > 60) {
+            mainHeader.classList.add('scrolled');
+            lastToggleTime = now;
+          }
+
+          // عند قمة الصفحة تأكد من ظهوره
+          if (currentScrollY <= 10 && isScrolled) {
+            mainHeader.classList.remove('scrolled');
+            lastToggleTime = now;
           }
         } else {
-          // السلوك الحالي للشاشات الكبيرة
+          // سلوك سطح المكتب (بدون تغيير)
           if (currentScrollY > 60) {
-            mainHeader.classList.add('scrolled');
+            if (!mainHeader.classList.contains('scrolled'))
+              mainHeader.classList.add('scrolled');
           } else {
-            mainHeader.classList.remove('scrolled');
+            if (mainHeader.classList.contains('scrolled'))
+              mainHeader.classList.remove('scrolled');
           }
         }
 

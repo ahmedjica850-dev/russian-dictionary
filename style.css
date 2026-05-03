@@ -1756,9 +1756,25 @@ section h3 {
 
   #mainHeader.scrolled .site-subtitle,
   #mainHeader.scrolled .dev-names,
-  #mainHeader.scrolled .header-controls {
-    display: none;                   /* إخفاء المحتوى الإضافي */
-  }
+  /* تحريك ناعم لعناصر التحكم عند الطي */
+.header-controls {
+  transition: opacity 0.25s ease, max-height 0.25s ease, margin 0.25s ease, padding 0.25s ease, border-top-width 0.25s ease;
+  opacity: 1;
+  max-height: 500px;  /* قيمة كبيرة تكفي لإظهار المحتوى */
+}
+
+#mainHeader.scrolled .header-controls {
+  /* إخفاء تدريجي بدلاً من display:none */
+  opacity: 0;
+  pointer-events: none;
+  max-height: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-top-width: 0;
+  overflow: hidden;
+}
 
   #mainHeader.scrolled .site-title {
     font-size: 1rem;
