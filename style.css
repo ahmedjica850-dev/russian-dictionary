@@ -1770,52 +1770,53 @@ section h3 {
     white-space: nowrap;
   }
 
+@media (max-width: 480px) {
+  /* ... الإعدادات الأخرى تبقى كما هي ... */
+
   /* ========== صف التحكم (بحث + أزرار) ========== */
   .header-controls {
-    order: 3;
     display: flex;
-    flex-direction: column;
-    gap: 2px;
-    margin-top: 2px;
+    flex-direction: column !important;  /* نضمن العمودية */
+    gap: 0 !important;                  /* لا مسافات بين العناصر */
+    margin: 0 !important;               /* لا هامش خارجي */
+    padding: 0 !important;              /* لا حشوة داخلية */
     width: 100%;
   }
 
-  /* عند التمرير: لا نغير شيئاً في صف التحكم */
-  #mainHeader.scrolled .header-controls {
-    margin-top: 0;
-  }
-
   .search-wrapper {
+    margin: 0 !important;
+    padding: 0;
     width: 100%;
   }
 
   #searchInput {
+    margin: 0;
     padding: 6px 30px 6px 10px;
     font-size: 0.75rem;
     height: 34px;
     border-radius: 20px;
   }
 
-  /* حاوية الأزرار الفرعية */
+  /* الأزرار: لا مسافات علوية أو سفلية */
   .filter-bar,
-  .sub-nav-bar {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+  .sub-nav-bar,
+  .view-toggle {
+    margin: 0 !important;
+    padding: 2px 4px !important;        /* فقط حشوة داخلية بسيطة */
     gap: 2px;
-    padding: 2px 4px;
-    margin: 0;
     background: var(--bg-secondary);
     border-radius: 20px;
     border: 1px solid var(--border-card);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
-  .filter-btn {
-    padding: 4px 6px;
-    font-size: 0.62rem;
-    border-radius: 12px;
+  .filter-btn,
+  .sub-nav-btn {
+    margin: 0;
   }
-
+}
   .sub-nav-btn {
     padding: 4px 6px;
     font-size: 0.62rem;
